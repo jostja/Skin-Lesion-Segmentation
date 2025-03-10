@@ -1,3 +1,4 @@
+import os
 import argparse
 import torch
 from architecture import UNet
@@ -19,19 +20,25 @@ def main():
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = UNet(n_channels=3, n_classes=1)
-    checkpoint = torch.load(args.checkpoint, map_location=device)
+    checkpoint = torch.load(args.checkpoint, map_location=device, weights_only=True)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.to(device)
     model.eval()
 
-    transform = A.Resize(height=args.img_size, width=args.img_size)
-    dataset = ISICDataset(images_path=args.images_path,
-                          masks_path=args.masks_path,
-                          size=args.img_size,
-                          transform=transform)
+    # Load the test data
+    ids = [image_file[:-4] for image_file in os.listdir(args.images_path) if image_file.endswith('.jpg')]
+    train_size = int(0.8 * len(ids))
+    val_size = int(0.1 * len(ids))
+    test_ids = ids[train_size + val_size:]
+    test_transform = A.Compose([
+        A.Resize(height=args.img_size, width=args.img_size),
+    ])
+    test_dataset = ISICDataset(images_path=args.images_path,
+                                masks_path=args.masks_path,
+                                ids=test_ids,
+                                size=args.img_size,
+                                geometric_transform=test_transform)
 
-    train_size = int(0.8 * len(dataset))
-    test_dataset = Subset(dataset, range(train_size, len(dataset)))
 
     num_samples = min(args.num_samples, len(test_dataset))  # Ensure we don't exceed dataset size
 
@@ -67,7 +74,7 @@ def main():
         axes[i, 2].axis('off')
 
     plt.tight_layout()
-    plt.savefig('multiple_image_masks.png')
+    plt.savefig(f'visualizations/{os.path.basename(os.path.dirname(args.checkpoint))}.png')
     plt.show()
 
 if __name__ == '__main__':

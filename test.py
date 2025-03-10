@@ -126,7 +126,7 @@ def main():
                                 masks_path=args.masks_path,
                                 ids=test_ids,
                                 size=args.img_size,
-                                transform=test_transform)
+                                geometric_transform=test_transform)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
     
     # Test the model
