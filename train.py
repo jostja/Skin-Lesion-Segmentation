@@ -159,7 +159,7 @@ test_results = test_model(test_loader, model, device)
 
 # Save the summary
 losses = {'train_losses': train_losses, 'val_losses': val_losses, 'test_results': test_results}
-summary = {'train_time': train_time, 'num_epochs': num_epochs, 'learning_rate': learning_rate, 'batch_size': batch_size, 'augment': augment, 'losses': losses, 'lambda_dice': lambda_dice, 'lambda_bce': lambda_bce, 'losses': losses, 'train_time': train_time}
+summary = {'train_time': train_time, 'num_epochs': num_epochs, 'learning_rate': learning_rate, 'batch_size': batch_size, 'augmentation': augmentation, 'losses': losses, 'lambda_dice': lambda_dice, 'lambda_bce': lambda_bce, 'losses': losses, 'train_time': train_time}
 
 
 with open(f"{output_dir}/" + "summary.json", 'w') as f:
