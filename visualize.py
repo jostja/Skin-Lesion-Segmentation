@@ -10,10 +10,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def main():
+    home = os.path.expanduser('~')
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint', type=str, default=None, help='Path to the checkpoint file')
-    parser.add_argument('--images_path', type=str, default='/hpi/fs00/home/jannis.jost/Skin-Lesion-Segmentation/data/images', help='Path to the training images')
-    parser.add_argument('--masks_path', type=str, default='/hpi/fs00/home/jannis.jost/Skin-Lesion-Segmentation/data/labels', help='Path to the training masks')
+    parser.add_argument('--images_path', type=str, default=home+'/Skin-Lesion-Segmentation/data/images', help='Path to the training images')
+    parser.add_argument('--masks_path', type=str, default=home+'/Skin-Lesion-Segmentation/data/labels', help='Path to the training masks')
     parser.add_argument('--img_size', type=int, default=256, help='Size of the input images')
     parser.add_argument('--num_samples', type=int, default=5, help='Number of test samples to visualize')
     args = parser.parse_args()

@@ -16,6 +16,8 @@ class UNet(nn.Module):
         self.conv5 = nn.Conv2d(512, 1024, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
+        # bottleneck
+        self.bottleneck = nn.Conv2d(1024, 1024, kernel_size=3, padding=1)
         # Expansive path (decoder)
         self.upconv1 = nn.ConvTranspose2d(1024, 512, kernel_size=2, stride=2)
         self.conv6 = nn.Conv2d(1024, 512, kernel_size=3, padding=1)
@@ -35,8 +37,11 @@ class UNet(nn.Module):
         x4 = F.relu(self.conv4(self.pool(x3)))
         x5 = F.relu(self.conv5(self.pool(x4)))
 
+        # connection between contracting and expansive path
+        x_bottleneck = F.relu(self.bottleneck(x5))
+
         # Expansive path (decoder)
-        x6 = F.relu(self.upconv1(x5))
+        x6 = F.relu(self.upconv1(x_bottleneck))
         x6 = torch.cat([x4, x6], dim=1)
         x6 = F.relu(self.conv6(x6))
         x7 = F.relu(self.upconv2(x6))
