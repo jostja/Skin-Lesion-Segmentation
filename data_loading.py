@@ -63,6 +63,7 @@ def get_augmentations(augmentation, img_size):
     else:
         raise ValueError("Invalid value for augment")
     return geometric_transform, color_transform
+
 class ISICDataset(Dataset):
     def __init__(self, images_path, masks_path, ids, size, geometric_transform=None, color_transform=None):
         self.images_path = images_path

@@ -56,3 +56,15 @@ class UNet(nn.Module):
         x10 = self.conv10(x9)
 
         return x10
+    
+class EnsembleUNet(nn.Module):
+    def __init__(self, models):
+        super(EnsembleUNet, self).__init__()
+        self.models = nn.ModuleList(models)
+        
+    def forward(self, x):
+        # Get the outputs of each model and average them
+        outputs = [model(x) for model in self.models]
+        stacked = torch.stack(outputs, dim=0)
+        return torch.mean(stacked, dim=0)
+        

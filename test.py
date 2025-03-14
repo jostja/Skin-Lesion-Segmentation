@@ -1,12 +1,13 @@
 import os
+import argparse
 import json
 import torch
 import torch.nn as nn
-from architecture import UNet
-from data_loading import ISICDataset
-from torch.utils.data import DataLoader, Subset
-import argparse
+from torch.utils.data import DataLoader
 import albumentations as A
+from architecture import UNet, EnsembleUNet
+from data_loading import ISICDataset
+
 
 class JaccardIndex(torch.nn.Module):
     def __init__(self):
@@ -42,8 +43,6 @@ class DiceBCELoss(torch.nn.Module):
         self.ce = nn.BCEWithLogitsLoss()
     def forward(self, pred, target):
         return self.lambda_dice * self.dice(pred, target) + self.lambda_bce * self.ce(pred, target)
-
-
 
 def calculate_loss(test_loader, model, criterion, device):
     test_loss = 0
@@ -82,8 +81,6 @@ def test_model(test_loader, model, device):
     print(f'Dice loss: {Dice_loss}')
     BCE_loss = calculate_loss(test_loader, model, nn.BCEWithLogitsLoss(), device)
     print(f'BCE loss: {BCE_loss}')
-    # DiceBCE_loss = calculate_loss(test_loader, model, DiceBCELoss(), device)
-    # print(f'DiceBCE loss: {DiceBCE_loss}')
     jaccard_index, threshold_jaccard_index = calculate_jaccard_indices(test_loader, model, device)
     print(f'Jaccard index: {jaccard_index}')
     print(f'Threshold Jaccard index: {threshold_jaccard_index}')
@@ -91,7 +88,6 @@ def test_model(test_loader, model, device):
     results = {
         'Dice_loss': Dice_loss,
         'BCE_loss': BCE_loss,
-        #'DiceBCE_loss': DiceBCE_loss,
         'jaccard_index': jaccard_index,
         'threshold_jaccard_index': threshold_jaccard_index
     }
@@ -105,15 +101,28 @@ def main():
     parser.add_argument('--masks_path', type=str, default=home+'/Skin-Lesion-Segmentation/data/labels', help='Path to the training masks')
     parser.add_argument('--img_size', type=int, default=256, help='Size of the input images')
     parser.add_argument('--model_checkpoint', type=str, default=home+'/Skin-Lesion-Segmentation/model_checkpoints/test', help='Path to the model checkpoint')
+    parser.add_argument('--model_type', type=str, default='UNet', help='Type of model to use')
     args = parser.parse_args()
     
     # Load the model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = UNet(n_channels=3, n_classes=1)
-    checkpoint = torch.load(args.model_checkpoint, weights_only=True)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model.to(device)
+    if args.model_type == 'UNet':
+        model = UNet(n_channels=3, n_classes=1)
+        checkpoint = torch.load(args.model_checkpoint, weights_only=True)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        model.to(device)
+    elif args.model_type == 'EnsembleUNet':
+        models = []
+        for checkpoint in os.listdir(args.model_checkpoint):
+            model = UNet(n_channels=3, n_classes=1)
+            model.load_state_dict(torch.load(os.path.join(args.model_checkpoint, checkpoint), weights_only=True)['model_state_dict'])
+            models.append(model)
+        model = EnsembleUNet(models)
+        model.to(device)
+    else:
+        raise ValueError('Model type not recognized')
+    
     # Load the test data
     ids = [image_file[:-4] for image_file in os.listdir(args.images_path) if image_file.endswith('.jpg')]
     train_size = int(0.8 * len(ids))

@@ -127,9 +127,10 @@ def generate_plots(jaccard_data, threshold_jaccard_data, dice_data, filenames, o
     fig_dice.write_image(f'{output_directory}/dice_comparison.png')
 
 if __name__ == "__main__":
+    home = os.path.expanduser("~")
     parser = argparse.ArgumentParser()
-    parser.add_argument("--filepath", type=str, default="/hpi/fs00/home/konrad.pawlak/Skin-Lesion-Segmentation/results")
-    parser.add_argument("--output_directory", type=str, default="/hpi/fs00/home/konrad.pawlak/Skin-Lesion-Segmentation/visualizations")
+    parser.add_argument("--filepath", type=str, default=home+"/Skin-Lesion-Segmentation/results")
+    parser.add_argument("--output_directory", type=str, default=home+"/Skin-Lesion-Segmentation/visualizations")
     args = parser.parse_args()
 
     if not os.path.isdir(args.filepath):
