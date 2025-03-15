@@ -54,9 +54,10 @@ def generate_plots(input_directory, output_directory):
                 print(f"Skipping {filename} due to error: {e}")
 
 if __name__ == "__main__":
+    home = os.path.expanduser("~")
     parser = argparse.ArgumentParser()
-    parser.add_argument("--filepath", type=str, default="/hpi/fs00/home/konrad.pawlak/Skin-Lesion-Segmentation/results")
-    parser.add_argument("--output_directory", type=str, default="/hpi/fs00/home/konrad.pawlak/Skin-Lesion-Segmentation/visualizations")
+    parser.add_argument("--filepath", type=str, default=home+"/Skin-Lesion-Segmentation/results")
+    parser.add_argument("--output_directory", type=str, default=home+"/Skin-Lesion-Segmentation/visualizations")
     args = parser.parse_args()
 
     if not os.path.isdir(args.filepath):
