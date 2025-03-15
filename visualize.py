@@ -19,29 +19,35 @@ def main():
     parser.add_argument('--num_samples', type=int, default=5, help='Number of test samples to visualize')
     args = parser.parse_args()
 
+    checkpoint = args.checkpoint
+    images_path = args.images_path
+    masks_path = args.masks_path
+    img_size = args.img_size
+    num_samples = args.num_samples
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = UNet(n_channels=3, n_classes=1)
-    checkpoint = torch.load(args.checkpoint, map_location=device, weights_only=True)
+    checkpoint = torch.load(checkpoint, map_location=device, weights_only=True)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.to(device)
     model.eval()
 
     # Load the test data
-    ids = [image_file[:-4] for image_file in os.listdir(args.images_path) if image_file.endswith('.jpg')]
+    ids = [image_file[:-4] for image_file in os.listdir(images_path) if image_file.endswith('.jpg')]
     train_size = int(0.8 * len(ids))
     val_size = int(0.1 * len(ids))
     test_ids = ids[train_size + val_size:]
     test_transform = A.Compose([
-        A.Resize(height=args.img_size, width=args.img_size),
+        A.Resize(height=img_size, width=img_size),
     ])
-    test_dataset = ISICDataset(images_path=args.images_path,
-                                masks_path=args.masks_path,
+    test_dataset = ISICDataset(images_path=images_path,
+                                masks_path=masks_path,
                                 ids=test_ids,
-                                size=args.img_size,
+                                size=img_size,
                                 geometric_transform=test_transform)
 
 
-    num_samples = min(args.num_samples, len(test_dataset))  # Ensure we don't exceed dataset size
+    num_samples = min(num_samples, len(test_dataset))  # Ensure we don't exceed dataset size
 
     fig, axes = plt.subplots(num_samples, 3, figsize=(10, 4 * num_samples))  # Grid for visualization
 
@@ -75,7 +81,7 @@ def main():
         axes[i, 2].axis('off')
 
     plt.tight_layout()
-    plt.savefig(f'visualizations/{os.path.basename(os.path.dirname(args.checkpoint))}.png')
+    plt.savefig(f'visualizations/{os.path.basename(os.path.dirname(checkpoint))}.png')
     plt.show()
 
 if __name__ == '__main__':

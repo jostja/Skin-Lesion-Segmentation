@@ -8,6 +8,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
 import albumentations as A
+import segmentation_models_pytorch as smp
 from architecture import UNet
 from data_loading import ISICDataset, get_augmentations
 from test import DiceBCELoss, test_model
@@ -24,6 +25,7 @@ def main():
     parser.add_argument('--num_epochs', type=int, default=30, help='Number of epochs to train the model')
     parser.add_argument('--checkpoint_interval', type=int, default=5, help='Interval of epochs to save checkpoints')
     parser.add_argument('--augmentation', type=str, default='geometric', help='How to augment the data')
+    parser.add_argument('--model_type', type=str, default='UNet', help='Type of model to use')
     parser.add_argument('--output_dir', type=str, default=home+'/Skin-Lesion-Segmentation/model_checkpoints/output', help='Directory to save the model checkpoints')
     parser.add_argument('--loss', type=str, default='diceBCE', help='Loss function to use')
     parser.add_argument('--lambda_dice', type=float, default=1.0, help='Weight for the dice loss')
@@ -39,6 +41,7 @@ def main():
     num_epochs = args.num_epochs
     checkpoint_interval = args.checkpoint_interval
     augmentation = args.augmentation
+    model_type = args.model_type
     output_dir = args.output_dir
     loss = args.loss
     lambda_dice = args.lambda_dice
@@ -83,8 +86,15 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = UNet(n_channels=3, n_classes=1).to(device)
-
+    if model_type == 'UNet':
+        model = UNet(n_channels=3, n_classes=1).to(device)
+    elif model_type == 'Mobilenet':
+        model = smp.Unet(encoder_name="mobilenet_v2", encoder_weights="imagenet", in_channels=3, classes=1).to(device)
+        for param in model.parameters():
+            param.requires_grad = True
+    else:
+        raise ValueError("Invalid value for model_type")
+    
     # Define the loss function and optimizer
     if loss == 'diceBCE':
         criterion = DiceBCELoss(lambda_dice=lambda_dice, lambda_bce=lambda_bce)
@@ -162,7 +172,7 @@ def main():
 
     # Save the summary
     losses = {'train_losses': train_losses, 'val_losses': val_losses, 'test_results': test_results}
-    summary = {'train_time': train_time, 'num_epochs': num_epochs, 'learning_rate': learning_rate, 'batch_size': batch_size, 'augmentation': augmentation, 'losses': losses, 'lambda_dice': lambda_dice, 'lambda_bce': lambda_bce, 'losses': losses, 'train_time': train_time}
+    summary = {'train_time': train_time, 'num_epochs': num_epochs, 'learning_rate': learning_rate, 'batch_size': batch_size, 'augmentation': augmentation, 'lambda_dice': lambda_dice, 'lambda_bce': lambda_bce, 'losses': losses, 'train_time': train_time}
 
 
     with open(f"{output_dir}/" + "summary.json", 'w') as f:

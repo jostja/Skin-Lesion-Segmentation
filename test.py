@@ -96,6 +96,7 @@ def test_model(test_loader, model, device):
 
 def main():
     home = os.path.expanduser('~')
+    # Parse the arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--images_path', type=str, default=home+'/Skin-Lesion-Segmentation/data/images', help='Path to the training images')
     parser.add_argument('--masks_path', type=str, default=home+'/Skin-Lesion-Segmentation/data/labels', help='Path to the training masks')
@@ -104,19 +105,24 @@ def main():
     parser.add_argument('--model_type', type=str, default='UNet', help='Type of model to use')
     args = parser.parse_args()
     
+    images_path = args.images_path
+    masks_path = args.masks_path
+    img_size = args.img_size
+    model_checkpoint = args.model_checkpoint
+    model_type = args.model_type
     # Load the model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    if args.model_type == 'UNet':
+    if model_type == 'UNet':
         model = UNet(n_channels=3, n_classes=1)
-        checkpoint = torch.load(args.model_checkpoint, weights_only=True)
+        checkpoint = torch.load(model_checkpoint, weights_only=True)
         model.load_state_dict(checkpoint['model_state_dict'])
         model.to(device)
-    elif args.model_type == 'EnsembleUNet':
+    elif model_type == 'EnsembleUNet':
         models = []
-        for checkpoint in os.listdir(args.model_checkpoint):
+        for checkpoint in os.listdir(model_checkpoint):
             model = UNet(n_channels=3, n_classes=1)
-            model.load_state_dict(torch.load(os.path.join(args.model_checkpoint, checkpoint), weights_only=True)['model_state_dict'])
+            model.load_state_dict(torch.load(os.path.join(model_checkpoint, checkpoint), weights_only=True)['model_state_dict'])
             models.append(model)
         model = EnsembleUNet(models)
         model.to(device)
@@ -124,17 +130,17 @@ def main():
         raise ValueError('Model type not recognized')
     
     # Load the test data
-    ids = [image_file[:-4] for image_file in os.listdir(args.images_path) if image_file.endswith('.jpg')]
+    ids = [image_file[:-4] for image_file in os.listdir(images_path) if image_file.endswith('.jpg')]
     train_size = int(0.8 * len(ids))
     val_size = int(0.1 * len(ids))
     test_ids = ids[train_size + val_size:]
     test_transform = A.Compose([
-        A.Resize(height=args.img_size, width=args.img_size),
+        A.Resize(height=img_size, width=img_size),
     ])
-    test_dataset = ISICDataset(images_path=args.images_path,
-                                masks_path=args.masks_path,
+    test_dataset = ISICDataset(images_path=images_path,
+                                masks_path=masks_path,
                                 ids=test_ids,
-                                size=args.img_size,
+                                size=img_size,
                                 geometric_transform=test_transform)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
     
@@ -142,8 +148,8 @@ def main():
     results = test_model(test_loader, model, device)
     
     # Save the results
-    directory = os.path.dirname(args.model_checkpoint)
-    file = os.path.splitext(os.path.basename(args.model_checkpoint))[0]
+    directory = os.path.dirname(model_checkpoint)
+    file = os.path.splitext(os.path.basename(model_checkpoint))[0]
     with open(os.path.join(directory, file + 'results.json'), 'w') as f:
         json.dump(results, f)
 

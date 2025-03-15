@@ -22,7 +22,7 @@ def load_data_from_jsons(directory):
     dice_data = []
     filenames = []
 
-    for filename in os.listdir(directory):
+    for filename in sorted(os.listdir(directory)):
         if filename.endswith(".json"):
             file_path = os.path.join(directory, filename)
             try:
@@ -132,14 +132,16 @@ if __name__ == "__main__":
     parser.add_argument("--filepath", type=str, default=home+"/Skin-Lesion-Segmentation/results")
     parser.add_argument("--output_directory", type=str, default=home+"/Skin-Lesion-Segmentation/visualizations")
     args = parser.parse_args()
+    filepath = args.filepath
+    output_directory = args.output_directory
 
-    if not os.path.isdir(args.filepath):
-        print(f"Error: The provided path '{args.filepath}' is not a valid directory.")
+    if not os.path.isdir(filepath):
+        print(f"Error: The provided path '{filepath}' is not a valid directory.")
         exit(1)
 
-    jaccard_data, threshold_jaccard_data, dice_data, filenames = load_data_from_jsons(args.filepath)
+    jaccard_data, threshold_jaccard_data, dice_data, filenames = load_data_from_jsons(filepath)
 
     if not jaccard_data:
         print("No valid JSON files found with the required keys.")
     else:
-        generate_plots(jaccard_data, threshold_jaccard_data, dice_data, filenames, args.output_directory)
+        generate_plots(jaccard_data, threshold_jaccard_data, dice_data, filenames, output_directory)
