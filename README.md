@@ -33,10 +33,10 @@ Download the ISIC dataset and place the images and labels in the appropriate dir
 
 Pre-trained model checkpoints are available for download:
 
-[Download Model Checkpoints](https://github.com/jostja/Skin-Lesion-Segmentation/model_checkpoints)
+[Download Model Checkpoints](https://drive.google.com/drive/folders/1GG3RhCCeAK8jxDWmllAXjVvhIAxKnpci?usp=sharing)
 
-To execute the demo notebook, ensure the model checkpoint `final_model.pth.tar` is in the `model_checkpoints` directory.
-You also find the model checkpoints for the ensemble model in the `model_checkpoints/ensemble` directory and the model with the Mobilenet backbone at `model_checkpoints/mobilenet.pth.tar`.
+To execute the demo notebook, ensure the model checkpoint `model.pth.tar` is in the `model_checkpoints` directory.
+You also find the model checkpoints for the ensemble model in the `ensemble` directory and the model with the Mobilenet backbone at `mobilenet.pth.tar`.
 
 ## How to Run
 
