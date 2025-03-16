@@ -98,6 +98,8 @@ These details are saved in `summary.json` in the output directory.
 
 There also exists functionality for an ensemble model that combines multiple UNet models to improve segmentation performance. The ensemble model uses the output of multiple UNet models to generate the final segmentation mask.
 
+You can find the ensemble model checkpoints at [Download Model Checkpoints](https://drive.google.com/drive/folders/1csiIvs3EUVGpjIgoQOrTkPDm5GlTYvd1?usp=sharing).
+
 To test an ensemble model, put the model checkpoints of the UNets in the `model_checkpoints/ensemble` directory and run:
 
 ```bash
