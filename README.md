@@ -1,6 +1,6 @@
 # Skin Lesion Segmentation with UNet
 
-This repository provides a PyTorch implementation for training a UNet model for skin lesion segmentation. The model is trained using the ISIC dataset and supports data augmentation, multiple loss functions, and model checkpoints.
+This repository provides a PyTorch implementation for training a UNet model for skin lesion segmentation. The model is trained using the ISIC dataset and our training supports data augmentation, multiple loss functions, and model checkpoints.
 
 ## Prerequisites
 
@@ -33,9 +33,10 @@ Download the ISIC dataset and place the images and labels in the appropriate dir
 
 Pre-trained model checkpoints are available for download:
 
-[Download Model Checkpoint](INSERT_MODEL_LINK_HERE)
+[Download Model Checkpoints](https://github.com/jostja/Skin-Lesion-Segmentation/model_checkpoints)
 
-To execute the demo notebook, place the model checkpoint `final_model.pth.tar` in the `model_checkpoints` directory.
+To execute the demo notebook, ensure the model checkpoint `final_model.pth.tar` is in the `model_checkpoints` directory.
+You also find the model checkpoints for the ensemble model in the `model_checkpoints/ensemble` directory and the model with the Mobilenet backbone at `model_checkpoints/mobilenet.pth.tar`.
 
 ## How to Run
 
@@ -81,7 +82,7 @@ The results will be saved in a `<checkpoint_name>_results.json` file in the mode
 
 ## GitHub Repository
 
-Find the full source code on GitHub: [GitHub Repo](INSERT_GITHUB_REPO_LINK_HERE)
+Find the full source code on GitHub: [GitHub Repo](https://github.com/jostja/Skin-Lesion-Segmentation)
 
 ## Results & Summary
 
