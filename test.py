@@ -150,7 +150,7 @@ def main():
     # Save the results
     directory = os.path.dirname(model_checkpoint)
     file = os.path.splitext(os.path.basename(model_checkpoint))[0]
-    with open(os.path.join(directory, file + 'results.json'), 'w') as f:
+    with open(os.path.join(directory, file + '_results.json'), 'w') as f:
         json.dump(results, f)
 
 if __name__ == '__main__':
