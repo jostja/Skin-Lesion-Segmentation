@@ -12,14 +12,14 @@ import matplotlib.pyplot as plt
 def main():
     home = os.path.expanduser('~')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--checkpoint', type=str, default=None, help='Path to the checkpoint file')
+    parser.add_argument('--checkpoint_dir', type=str, default=None, help='Path to the checkpoint file')
     parser.add_argument('--images_path', type=str, default=home+'/Skin-Lesion-Segmentation/data/images', help='Path to the training images')
     parser.add_argument('--masks_path', type=str, default=home+'/Skin-Lesion-Segmentation/data/labels', help='Path to the training masks')
     parser.add_argument('--img_size', type=int, default=256, help='Size of the input images')
     parser.add_argument('--num_samples', type=int, default=5, help='Number of test samples to visualize')
     args = parser.parse_args()
 
-    checkpoint = args.checkpoint
+    checkpoint_dir = args.checkpoint_dir
     images_path = args.images_path
     masks_path = args.masks_path
     img_size = args.img_size
@@ -27,7 +27,7 @@ def main():
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = UNet(n_channels=3, n_classes=1)
-    checkpoint = torch.load(checkpoint, map_location=device, weights_only=True)
+    checkpoint = torch.load(checkpoint_dir, map_location=device, weights_only=True)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.to(device)
     model.eval()
@@ -81,7 +81,7 @@ def main():
         axes[i, 2].axis('off')
 
     plt.tight_layout()
-    plt.savefig(f'visualizations/{os.path.basename(os.path.dirname(checkpoint))}.png')
+    plt.savefig(f'visualizations/{os.path.basename(os.path.dirname(checkpoint_dir))}.png')
     plt.show()
 
 if __name__ == '__main__':
