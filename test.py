@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import albumentations as A
+import segmentation_models_pytorch as smp
 from architecture import UNet, EnsembleUNet
 from data_loading import ISICDataset
 
@@ -115,6 +116,11 @@ def main():
 
     if model_type == 'UNet':
         model = UNet(n_channels=3, n_classes=1)
+        checkpoint = torch.load(model_checkpoint, weights_only=True)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        model.to(device)
+    elif model_type == 'Mobilenet':
+        model = smp.Unet('mobilenet_v2', encoder_weights=None, in_channels=3, classes=1)
         checkpoint = torch.load(model_checkpoint, weights_only=True)
         model.load_state_dict(checkpoint['model_state_dict'])
         model.to(device)
